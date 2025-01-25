@@ -3,8 +3,8 @@ ext.versions = [
         minSdk                          : 17,
         compileSdk                      : 34,
 
-        publishVersion_core             : '1.0.10',
-        publishVersionCode_core         : 22,
+        publishVersion_core             : '2.0.0',
+        publishVersionCode_core         : 23,
 
         publishVersion_chromecast       : '0.30',
         publishVersionCode_chromecast   : 15,
@@ -23,7 +23,7 @@ ext.versions = [
         appcompat                       : '1.6.1',
         androidxAnnotations             : '1.6.0',
         androidxConstraintLayout        : '2.1.4',
-        androidxRecyclerView            : '1.3.2',
+        androidxRecyclerView           : '1.3.2',
         androidxMediarouter             : '1.6.0',
         androidxLifecycleRuntime        : '2.6.0',
 
