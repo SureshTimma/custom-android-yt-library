@@ -55,6 +55,16 @@ interface YouTubePlayer {
   fun setPlaybackQuality(quality: String)
 
   /**
+   * Show video captions if available
+   */
+  fun showCaptions()
+
+  /**
+   * Hide video captions
+   */
+  fun hideCaptions()
+
+  /**
    * Tries to enter or exit fullscreen in the player.
    *
    * Might require setting the `origin` parameter to "https://www.youtube.com".
