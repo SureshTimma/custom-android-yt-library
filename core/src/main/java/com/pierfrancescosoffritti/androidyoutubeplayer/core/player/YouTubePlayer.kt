@@ -61,6 +61,16 @@ interface YouTubePlayer {
    */
   fun toggleFullscreen()
 
+  /**
+   * Hide captions in the player.
+   */
+  fun hideCaption()
+
+  /**
+   * Show captions in the player.
+   */
+  fun showCaption()
+
   fun addListener(listener: YouTubePlayerListener): Boolean
   fun removeListener(listener: YouTubePlayerListener): Boolean
 }

@@ -34,8 +34,28 @@
 
     var YouTubePlayerBridge = window.YouTubePlayerBridge;
     var player;
-
     var timerId;
+    var captionHideTimer;
+
+    function hideCaption() {
+      captionHideTimer = setInterval(() => {
+        if(!player) {
+          return;
+        }
+        player.unloadModule('captions');
+      }, 1000);
+    }
+
+    function showCaption() {
+      if(!player) {
+        return;
+      }
+      if(captionHideTimer) {
+        clearInterval(captionHideTimer);
+        captionHideTimer = null;
+      }
+      player.loadModule('captions');
+    }
 
     function onYouTubeIframeAPIReady() {
 
@@ -48,7 +68,11 @@
     	  videoId: <<injectedVideoId>>,
     			
         events: {
-    	    onReady: function(event) { YouTubePlayerBridge.sendReady() },
+    	    onReady: function(event) { 
+    		  YouTubePlayerBridge.sendReady();
+    		  // Start hiding captions by default
+    		  hideCaption();
+    		  },
     		  onStateChange: function(event) { sendPlayerStateChange(event.data) },
     		  onPlaybackQualityChange: function(event) { YouTubePlayerBridge.sendPlaybackQualityChange(event.data) },
     		  onPlaybackRateChange: function(event) { YouTubePlayerBridge.sendPlaybackRateChange(event.data) },
