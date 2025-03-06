@@ -282,6 +282,12 @@
         if (related) {
           related.style.display = 'none';
         }
+
+        // Hide YouTube logo in the bottom right
+        const ytLogo = frameDoc.querySelector('.ytp-youtube-button');
+        if (ytLogo) {
+          ytLogo.style.display = 'none';
+        }
       }, 100);
     }
 
