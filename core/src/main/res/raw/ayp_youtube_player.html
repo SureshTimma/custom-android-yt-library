@@ -283,13 +283,34 @@
           related.style.display = 'none';
         }
 
-        // Hide YouTube logo in the bottom right
+        // Hide YouTube logo in the bottom right (multiple selectors to ensure coverage)
+        // Standard YouTube button
         const ytLogo = frameDoc.querySelector('.ytp-youtube-button');
         if (ytLogo) {
           ytLogo.style.display = 'none';
         }
+        
+        // Watermark for embedded videos
+        const ytWatermark = frameDoc.querySelector('.ytp-watermark');
+        if (ytWatermark) {
+          ytWatermark.style.display = 'none';
+        }
+        
+        // Additional YouTube branding elements that might appear
+        const ytElements = frameDoc.querySelectorAll('[aria-label*="YouTube"]');
+        ytElements.forEach(element => {
+          element.style.display = 'none';
+        });
+        
+        // Logo container that might have different class names
+        const logoContainer = frameDoc.querySelector('.ytp-chrome-bottom');
+        if (logoContainer) {
+          const logos = logoContainer.querySelectorAll('a');
+          logos.forEach(logo => {
+            logo.style.display = 'none';
+          });
+        }
       }, 100);
     }
-
   </script>
 </html>
