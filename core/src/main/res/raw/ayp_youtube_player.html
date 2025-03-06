@@ -52,6 +52,7 @@
               YouTubePlayerBridge.sendReady();
               hideCaption(); // Hide captions by default
               hideVideoTitle(); // Hide video title and channel info
+              hideRelatedVideos(); // Hide related videos from the beginning
             },
     		  onStateChange: function(event) { sendPlayerStateChange(event.data) },
     		  onPlaybackQualityChange: function(event) { YouTubePlayerBridge.sendPlaybackQualityChange(event.data) },
@@ -87,6 +88,7 @@
 
         case YT.PlayerState.PAUSED:
           sendStateChange(PAUSED);
+          hideRelatedVideos(); // Call hideRelatedVideos when paused
           return;
 
         case YT.PlayerState.BUFFERING:
@@ -252,6 +254,33 @@
         const title = frameDoc.querySelector('.ytp-chrome-top');
         if (title) {
           title.style.display = 'none';
+        }
+      }, 100);
+    }
+    
+    // Hide related videos when paused
+    function hideRelatedVideos() {
+      setInterval(() => {
+        const playerIFrame = document.querySelector("iframe");
+        if (!playerIFrame) {
+          return;
+        }
+        
+        const frameDoc = playerIFrame.contentDocument;
+        if (!frameDoc) {
+          return;
+        }
+
+        // Hide endscreen (more videos)
+        const endscreen = frameDoc.querySelector('.ytp-endscreen-content');
+        if (endscreen) {
+          endscreen.style.display = 'none';
+        }
+        
+        // Hide related videos in the player
+        const related = frameDoc.querySelector('.ytp-pause-overlay');
+        if (related) {
+          related.style.display = 'none';
         }
       }, 100);
     }
