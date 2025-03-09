@@ -132,7 +132,18 @@
     // JAVA to WEB functions
 
     function seekTo(startSeconds) {
+      // When seeking, we need to temporarily pause our DOM manipulations
+      if (window.relatedVideosInterval) {
+        clearInterval(window.relatedVideosInterval);
+      }
+      
+      // Perform the seek operation
       player.seekTo(startSeconds, true);
+      
+      // Restart our element hiding after a short delay
+      setTimeout(function() {
+        hideRelatedVideos();
+      }, 500);
     }
 
     function pauseVideo() {
@@ -260,35 +271,46 @@
     
     // Hide related videos when paused
     function hideRelatedVideos() {
-      setInterval(() => {
-        const playerIFrame = document.querySelector("iframe");
-        if (!playerIFrame) {
-          return;
-        }
-        
-        const frameDoc = playerIFrame.contentDocument;
-        if (!frameDoc) {
-          return;
-        }
+      // Clear any existing interval to avoid multiple intervals running
+      if (window.relatedVideosInterval) {
+        clearInterval(window.relatedVideosInterval);
+      }
+      
+      // Use a less aggressive approach to hide elements
+      window.relatedVideosInterval = setInterval(() => {
+        try {
+          const playerIFrame = document.querySelector("iframe");
+          if (!playerIFrame) {
+            return;
+          }
+          
+          const frameDoc = playerIFrame.contentDocument;
+          if (!frameDoc) {
+            return;
+          }
 
-        // Hide endscreen (more videos)
-        const endscreen = frameDoc.querySelector('.ytp-endscreen-content');
-        if (endscreen) {
-          endscreen.style.display = 'none';
-        }
-        
-        // Hide related videos in the player
-        const related = frameDoc.querySelector('.ytp-pause-overlay');
-        if (related) {
-          related.style.display = 'none';
-        }
+          // Hide endscreen (more videos)
+          const endscreen = frameDoc.querySelector('.ytp-endscreen-content');
+          if (endscreen) {
+            endscreen.style.display = 'none';
+          }
+          
+          // Hide related videos in the player
+          const related = frameDoc.querySelector('.ytp-pause-overlay');
+          if (related) {
+            related.style.display = 'none';
+          }
 
-        // Specifically target just the YouTube logo in the bottom right
-        const ytWatermark = frameDoc.querySelector('.ytp-watermark');
-        if (ytWatermark) {
-          ytWatermark.style.display = 'none';
+          // Specifically target just the YouTube logo in the bottom right
+          const ytWatermark = frameDoc.querySelector('.ytp-watermark');
+          if (ytWatermark) {
+            ytWatermark.style.display = 'none';
+          }
+        } catch (e) {
+          // Silently fail if any errors occur to avoid breaking video playback
+          console.error("Error in hideRelatedVideos: ", e);
         }
-      }, 100);
+      }, 250); // Less frequent interval to reduce processing overhead
     }
   </script>
 </html>
