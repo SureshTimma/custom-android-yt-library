@@ -104,6 +104,8 @@ Also remember when publishing your app on the PlayStore to write title and descr
     4. [Remove views that cannot be removed by the controls parameter](#remove-annoying-views)
     5. [Force to hide subtitles](#hide-captions)
     6. [Play Next Recomended Video](#play-next-recomended-video)
+    7. [Hiding the "more videos" overlay that appears when videos are paused](#hide-more-videos-on-pause)
+    8. [Removing the YouTube logo/watermark to create a distraction-free experience](#hide-youtube-watermark-on-pause)
 
 # Sample app
 :memo: Both the **core module** and the **chromecast module** have a sample app, to provide examples of usage of the libraries.
@@ -1321,6 +1323,128 @@ And implement it in `WebViewYouTubePlayer`
 ```kt
 override fun playNextVideo() {
   mainThreadHandler.post { loadUrl("javascript:playNextVideo()") }
+}
+```
+
+## Hide More Videos On Pause
+When a video is paused, YouTube shows related/suggested videos which can distract users. Here's how to hide them:
+
+1. Open `ayp_youtube_player.html`
+2. Add a new function to hide related videos:
+
+```javascript
+// Add this function at the end of the file before the closing </script> tag
+function hideRelatedVideos() {
+  setInterval(() => {
+    const playerIFrame = document.querySelector("iframe");
+    if (!playerIFrame) {
+      return;
+    }
+    
+    const frameDoc = playerIFrame.contentDocument;
+    if (!frameDoc) {
+      return;
+    }
+
+    // Hide endscreen (more videos)
+    const endscreen = frameDoc.querySelector('.ytp-endscreen-content');
+    if (endscreen) {
+      endscreen.style.display = 'none';
+    }
+    
+    // Hide related videos in the player
+    const related = frameDoc.querySelector('.ytp-pause-overlay');
+    if (related) {
+      related.style.display = 'none';
+    }
+  }, 100);
+}
+```
+
+3. Call this function when the player is initialized. Find the `onReady` event handler and add a call to `hideRelatedVideos()`:
+
+```javascript
+events: {
+  onReady: function(event) { 
+    YouTubePlayerBridge.sendReady();
+    hideCaption(); // Hide captions by default
+    hideVideoTitle(); // Hide video title and channel info
+    hideRelatedVideos(); // Add this line to hide related videos from the beginning
+  },
+  // ...
+}
+```
+
+4. Also call this function when the video is paused. Find the `PAUSED` case in the `sendPlayerStateChange` function:
+
+```javascript
+case YT.PlayerState.PAUSED:
+  sendStateChange(PAUSED);
+  hideRelatedVideos(); // Add this line to hide related videos when paused
+  return;
+```
+
+## Hide YouTube Watermark On Pause
+
+The YouTube logo in the bottom right corner can also be distracting. Here's how to hide it:
+
+1. Modify the `hideRelatedVideos()` function to also hide the YouTube watermark:
+
+```javascript
+function hideRelatedVideos() {
+  setInterval(() => {
+    // Previous code...
+    
+    // Add this code to hide the YouTube watermark
+    const ytWatermark = frameDoc.querySelector('.ytp-watermark');
+    if (ytWatermark) {
+      ytWatermark.style.display = 'none';
+    }
+  }, 100);
+}
+```
+
+It's essential to test your changes carefully to ensure they work as expected without breaking the player functionality:
+
+1. Build and run your app with the modified player
+2. Check that videos play normally
+3. Pause videos and verify that no related videos or YouTube logo appear
+4. Test on different device sizes and orientations
+
+### Black Screen Issue
+
+If the video turns black after your modifications, your CSS selectors might be too aggressive:
+
+```javascript
+// DON'T use overly-aggressive selectors like these:
+const ytElements = frameDoc.querySelectorAll('[aria-label*="YouTube"]');
+ytElements.forEach(element => {
+  element.style.display = 'none';
+});
+
+// Instead, be precise with your targeting:
+const ytWatermark = frameDoc.querySelector('.ytp-watermark');
+if (ytWatermark) {
+  ytWatermark.style.display = 'none';
+}
+```
+
+### Player Controls Not Working
+
+If some player controls stop working after your modifications, you might be hiding essential elements:
+
+```javascript
+// Be careful with selectors that might affect player controls
+const logoContainer = frameDoc.querySelector('.ytp-chrome-bottom');
+if (logoContainer) {
+  // DON'T hide the entire container
+  // logoContainer.style.display = 'none'; 
+  
+  // DO target specific elements within it
+  const logos = logoContainer.querySelectorAll('.ytp-youtube-button');
+  logos.forEach(logo => {
+    logo.style.display = 'none';
+  });
 }
 ```
 

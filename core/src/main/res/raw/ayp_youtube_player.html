@@ -290,8 +290,8 @@
         clearInterval(window.relatedVideosInterval);
       }
       
-      // Use a less aggressive approach to hide elements
-      window.relatedVideosInterval = setInterval(() => {
+      // Define a function to apply the hiding once
+      function applyElementHiding() {
         try {
           const playerIFrame = document.querySelector("iframe");
           if (!playerIFrame) {
@@ -324,7 +324,113 @@
           // Silently fail if any errors occur to avoid breaking video playback
           console.error("Error in hideRelatedVideos: ", e);
         }
-      }, 250); // Less frequent interval to reduce processing overhead
+      }
+      
+      // Apply immediately once
+      applyElementHiding();
+      
+      // Set up a more efficient interval with reduced frequency
+      window.relatedVideosInterval = setInterval(applyElementHiding, 1000);
+    }
+    
+    // Register one-time event handler when player is ready
+    function registerPlayerEvents() {
+      if (window.playerEventsRegistered || !player) {
+        return;
+      }
+      
+      window.playerEventsRegistered = true;
+      
+      // Event listener for state changes including after seeking
+      player.addEventListener('onStateChange', function(event) {
+        // When video starts playing (after seeking or play)
+        if (event.data === 1) {
+          // Apply element hiding with a small delay
+          setTimeout(function() {
+            try {
+              // Hide related videos and branding
+              const playerIFrame = document.querySelector("iframe");
+              if (playerIFrame && playerIFrame.contentDocument) {
+                // Hide YouTube elements
+                const endscreen = playerIFrame.contentDocument.querySelector('.ytp-endscreen-content');
+                if (endscreen) endscreen.style.display = 'none';
+                
+                const related = playerIFrame.contentDocument.querySelector('.ytp-pause-overlay');
+                if (related) related.style.display = 'none';
+                
+                const ytWatermark = playerIFrame.contentDocument.querySelector('.ytp-watermark');
+                if (ytWatermark) ytWatermark.style.display = 'none';
+              }
+            } catch (e) {
+              console.error("Error in player state handler: ", e);
+            }
+          }, 100);
+        }
+      });
+    }
+    
+    // Original seekTo function reference
+    var originalSeekTo = window.seekTo;
+    
+    // Override seekTo to fix the frozen video issue
+    window.seekTo = function(startSeconds) {
+      if (typeof originalSeekTo === 'function') {
+        // Call the original seekTo function
+        originalSeekTo(startSeconds);
+        
+        // Fix for videos that freeze on seek while audio continues playing
+        setTimeout(function() {
+          try {
+            if (player) {
+              // Current state - if playing, need special handling
+              var state = player.getPlayerState();
+              
+              // When video is playing (state 1) and we have iframe access
+              if (state === 1) {
+                // Get the current iframe and briefly toggle display
+                // This forces a redraw of the video element which can help unfreeze it
+                var playerIFrame = document.querySelector("iframe");
+                if (playerIFrame) {
+                  // Brief visual refresh to unfreeze the video frame
+                  var current = playerIFrame.style.opacity || "1";
+                  playerIFrame.style.opacity = "0.99";
+                  
+                  setTimeout(function() {
+                    playerIFrame.style.opacity = current;
+                    
+                    // Also re-hide elements that might have reappeared
+                    if (playerIFrame.contentDocument) {
+                      var elements = playerIFrame.contentDocument.querySelectorAll(
+                        '.ytp-endscreen-content, .ytp-pause-overlay, .ytp-watermark'
+                      );
+                      
+                      for (var i = 0; i < elements.length; i++) {
+                        elements[i].style.display = 'none';
+                      }
+                    }
+                  }, 50);
+                }
+              }
+            }
+          } catch (e) {
+            console.error("Error fixing video freeze: ", e);
+          }
+        }, 200);
+      }
+    };
+    
+    // Call this once when the player is loaded
+    function initializePlayerCustomizations() {
+      // First hide the YouTube elements
+      hideRelatedVideos();
+      
+      // Then register event handlers for state changes and seeking
+      registerPlayerEvents();
+    }
+    
+    // Call initialization once onYouTubeIframeAPIReady completes
+    if (typeof player !== 'undefined' && player) {
+      initializePlayerCustomizations();
     }
   </script>
 </html>
