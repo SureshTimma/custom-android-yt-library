@@ -1,4 +1,10 @@
-#### \<Advertisement\>
+stable version:
+Git:
+v1.0.18-0-g64b8f34
+commit 64b8f3479d19ac25480ffd978d647a61d58b3744
+Author: SureshTimma
+Date:   Thu Mar 6 18:36:30 2025 +0530
+Hide related videos when paused to avoid distraction during note taking
 
 #### [:mega: Reply to Google Play Reviews using AI :arrow_right:](https://playstorereply.com) 
 Increase your apps ratings. Engage with all users, no more unanswered reviews.
