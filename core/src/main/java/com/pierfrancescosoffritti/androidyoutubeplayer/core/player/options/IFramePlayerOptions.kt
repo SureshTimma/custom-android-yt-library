@@ -1,5 +1,6 @@
 package com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options
 
+import android.content.Context
 import org.json.JSONException
 import org.json.JSONObject
 
