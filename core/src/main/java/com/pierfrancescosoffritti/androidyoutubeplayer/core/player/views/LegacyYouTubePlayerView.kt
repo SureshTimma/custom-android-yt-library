@@ -130,7 +130,7 @@ internal class LegacyYouTubePlayerView(
    * @see LegacyYouTubePlayerView.initialize
    */
   fun initialize(youTubePlayerListener: YouTubePlayerListener, handleNetworkEvents: Boolean) =
-    initialize(youTubePlayerListener, handleNetworkEvents, IFramePlayerOptions.default)
+    initialize(youTubePlayerListener, handleNetworkEvents, IFramePlayerOptions.getDefault(context))
 
   /**
    * Initialize the player. Network events are automatically handled by the player.
